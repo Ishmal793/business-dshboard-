@@ -148,31 +148,44 @@ with a2:
             color="Product:N"
         )
     st.altair_chart(bar_chart, use_container_width=True,theme=theme_plotly)
+
+# Create two columns for the layout
+col1, col2 = st.columns(2)
+
+# Scatter Plot in the first column
+with col1:
+    st.subheader('Features by Frequency (Scatter Plot)', divider='rainbow')
     
-p1,p2=st.columns(2) 
-with p1:
-    # Select features to display scatter plot
-    st.subheader('Features by Frequency', divider='rainbow',)
-    feature_x = st.selectbox('Select feature for x Qualitative data', df2.select_dtypes("object").columns)
-    feature_y = st.selectbox('Select feature for y Quantitative Data', df2.select_dtypes("number").columns)
+    # Select features for scatter plot
+    feature_x = st.selectbox('Select feature for X-axis (Qualitative data)', df2.select_dtypes("object").columns, key="scatter_x")
+    feature_y = st.selectbox('Select feature for Y-axis (Quantitative Data)', df2.select_dtypes("number").columns, key="scatter_y")
+    
+    # Plot scatter plot using Plotly Express
+    fig_scatter = px.scatter(
+        df2, 
+        x=feature_x, 
+        y=feature_y, 
+        color='Product',  # Replace 'Product' with a valid column name in your dataset
+        title=f'Scatter Plot: {feature_x} vs {feature_y}',
+        labels={feature_x: feature_x, feature_y: feature_y},
+        template="plotly_white"
+    )
+    st.plotly_chart(fig_scatter, use_container_width=True)
 
-    # Display scatter plot
-    fig, ax = plt.subplots()
-    sns.scatterplot(data=df2, x=feature_x, y=feature_y, hue=df.Product, ax=ax)
-    st.pyplot(fig)
-
-
-with p2:
-    st.subheader('Features by Frequency', divider='rainbow',)
-    feature = st.selectbox('Select a feature', df2.select_dtypes("object").columns)
-    # Plot histogram
-    fig, ax = plt.subplots()
-    ax.hist(df2[feature], bins=20)
-
-    # Set the title and labels
-    ax.set_title(f'Histogram of {feature}')
-    ax.set_xlabel(feature)
-    ax.set_ylabel('Frequency')
-
-    # Display the plot
-    st.pyplot(fig)
+# Histogram in the second column
+with col2:
+    st.subheader('Histogram of Selected Feature', divider='rainbow')
+    
+    # Select a feature for the histogram
+    feature = st.selectbox('Select a feature', df2.select_dtypes("object").columns, key="hist_feature")
+    
+    # Plot histogram using Plotly Express
+    fig_hist = px.histogram(
+        df2,
+        x=feature,
+        nbins=20,
+        title=f'Histogram of {feature}',
+        labels={feature: feature},
+        template="plotly_white"
+    )
+    st.plotly_chart(fig_hist, use_container_width=True)
