@@ -29,7 +29,7 @@ st.markdown(
 # Function to load default data (data.csv)
 @st.cache_data
 def load_default_data():
-    return pd.read_csv(r'c:\Users\Extreme\OneDrive\Desktop\streamlit  dashboards\bussiness_dashboard\data.csv')
+    return pd.read_csv('data.csv')
 
 # Function to load uploaded files (supports CSV)
 def load_uploaded_file(uploaded_file):
