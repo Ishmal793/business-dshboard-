@@ -1,14 +1,11 @@
-import streamlit as st 
+import streamlit as st
 import pandas as pd
-import altair as alt 
+import altair as alt
 import plotly.express as px
 from streamlit_extras.dataframe_explorer import dataframe_explorer
 
-# Configure the page width 
+# Configure Streamlit Page
 st.set_page_config(page_title="Analytics", page_icon="🌎", layout="wide")
-
-# Streamlit theme = None
-theme_plotly = None 
 
 # Refresh Button
 if st.button("🔄 Refresh Dashboard"):
@@ -25,27 +22,27 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Function to load dataset
+# Load dataset
 @st.cache_data
 def load_data():
     return pd.read_csv('data.csv')
 
 df = load_data()
 
-# Ensure 'OrderDate' is in datetime format
-df['OrderDate'] = pd.to_datetime(df['OrderDate'])
+# Ensure 'OrderDate' column is in datetime format
+df['OrderDate'] = pd.to_datetime(df['OrderDate'], errors='coerce')
 
-# Display dataset preview
+# Check if dataset is empty
+if df.empty:
+    st.warning("⚠️ No data available. Please check your dataset.")
+    st.stop()
+
+# Display Dataset
 with st.expander("📊 View Dataset"):
     st.dataframe(df, use_container_width=True)
 
 # Business Metrics Heading
 st.subheader("📈 Business Metrics")
-
-# Check if df is empty
-if df.empty:
-    st.warning("⚠️ No data available. Please check your dataset.")
-    st.stop()
 
 # Create two columns for layout
 col1, col2 = st.columns(2)
@@ -54,14 +51,14 @@ col1, col2 = st.columns(2)
 with col1:
     st.subheader("Products & Quantities", divider="rainbow")
     source = pd.DataFrame({
-        "Quantity ($)": df["Quantity"],
+        "Quantity": df["Quantity"],
         "Product": df["Product"]
     })
     bar_chart = alt.Chart(source).mark_bar().encode(
-        x="sum(Quantity ($)):Q",
+        x="sum(Quantity):Q",
         y=alt.Y("Product:N", sort="-x")
     )
-    st.altair_chart(bar_chart, use_container_width=True, theme=theme_plotly)
+    st.altair_chart(bar_chart, use_container_width=True)
 
 # Data Metrics
 with col2:
@@ -87,7 +84,7 @@ with col3:
     dot_chart = alt.Chart(df).mark_circle().encode(
         x='Product',
         y='TotalPrice',
-        color='Category',
+        color='Category'
     ).interactive()
     st.altair_chart(dot_chart, use_container_width=True)
 
@@ -99,7 +96,7 @@ with col4:
         y="sum(UnitPrice):Q",
         color="Product:N"
     )
-    st.altair_chart(unit_price_chart, use_container_width=True, theme=theme_plotly)
+    st.altair_chart(unit_price_chart, use_container_width=True)
 
 # Scatter Plot
 col5, col6 = st.columns(2)
@@ -121,10 +118,3 @@ with col6:
 
     hist_fig = px.histogram(df, x=hist_feature, nbins=20, template="plotly_white")
     st.plotly_chart(hist_fig, use_container_width=True)
-
-        nbins=20,
-        title=f'Histogram of {feature}',
-        labels={feature: feature},
-        template="plotly_white"
-    )
-    st.plotly_chart(fig_hist, use_container_width=True)
